@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using PrimeTween;
 using System.Collections;
 using TMPro;
@@ -12,7 +11,7 @@ public class LevelCompleteController : MonoBehaviour
     [Header("Currency Animation")]
     public TextMeshProUGUI currencyText;
     public GameObject currencyIcon;
-    public int earnedCurrency = 100; // Gained Stars
+    public int earnedCurrency = 100;
     public float countDuration = 1.5f;
     public float scaleIntensity = 1.2f;
 
@@ -26,9 +25,24 @@ public class LevelCompleteController : MonoBehaviour
     private int currentCurrencyValue = 0;
     private Sequence celebrationSequence;
     private Coroutine currencyCoroutine;
+    private bool isFirstTime = true;
 
     private void OnEnable()
     {
+        if (isFirstTime)
+        {
+            StartCoroutine(StartAfterFrame());
+            isFirstTime = false;
+        }
+        else
+        {
+            StartCelebrationSequence();
+        }
+    }
+
+    private IEnumerator StartAfterFrame()
+    {
+        yield return null;
         StartCelebrationSequence();
     }
 
@@ -47,7 +61,6 @@ public class LevelCompleteController : MonoBehaviour
 
     private void StartCurrencyAnimation()
     {
-
         Sequence iconSequence = Sequence.Create()
            .Chain(Tween.Scale(currencyIcon.transform, Vector3.zero, Vector3.one * 1.3f, 0.4f, Ease.OutBack))
            .Chain(Tween.Scale(currencyIcon.transform, Vector3.one * 1.3f, Vector3.one, 0.2f, Ease.InOutSine))
@@ -55,7 +68,6 @@ public class LevelCompleteController : MonoBehaviour
            .Chain(Tween.Rotation(currencyIcon.transform, new Vector3(0, 0, 15f), new Vector3(0, 0, -10f), 0.1f))
            .Chain(Tween.Rotation(currencyIcon.transform, new Vector3(0, 0, -10f), Vector3.zero, 0.1f))
            .OnComplete(() => {
-               
                if (this.isActiveAndEnabled)
                {
                    currencyCoroutine = StartCoroutine(AnimateCurrencyCounter());
@@ -76,7 +88,6 @@ public class LevelCompleteController : MonoBehaviour
         int startValue = 0;
         int endValue = earnedCurrency;
 
-        
         while (timer < countDuration && this.isActiveAndEnabled)
         {
             timer += Time.deltaTime;
@@ -88,7 +99,6 @@ public class LevelCompleteController : MonoBehaviour
             yield return null;
         }
 
-        
         if (this.isActiveAndEnabled)
         {
             currentCurrencyValue = endValue;
@@ -102,7 +112,6 @@ public class LevelCompleteController : MonoBehaviour
 
     private void PlayMainParticles()
     {
-
         foreach (var ps in celebrationParticles)
         {
             if (ps != null)
@@ -113,7 +122,7 @@ public class LevelCompleteController : MonoBehaviour
         }
     }
 
-    private void ResetPanelState()
+    public void ResetPanelState()
     {
         if (titleTransform != null)
         {
@@ -124,7 +133,7 @@ public class LevelCompleteController : MonoBehaviour
         {
             currencyText.text = "0";
             currencyText.transform.localScale = Vector3.one;
-            currencyText.color = Color.white; 
+            currencyText.color = Color.white;
         }
 
         if (currencyIcon != null)
@@ -149,7 +158,6 @@ public class LevelCompleteController : MonoBehaviour
 
     private void OnDisable()
     {
-        
         if (celebrationSequence.isAlive)
             celebrationSequence.Stop();
 
@@ -160,20 +168,11 @@ public class LevelCompleteController : MonoBehaviour
         }
 
         StopAllParticles();
-        StopAllCoroutines(); 
+        StopAllCoroutines();
     }
 
     public void SetEarnedCurrency(int amount)
     {
         earnedCurrency = amount;
-    }
-
-    public void ShowLevelComplete(int currencyEarned = 0)
-    {
-        if (currencyEarned > 0)
-        {
-            earnedCurrency = currencyEarned;
-        }
-        gameObject.SetActive(true);
     }
 }

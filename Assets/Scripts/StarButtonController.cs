@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using PrimeTween;
+using System.Collections;
 
 public class StarButtonController : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class StarButtonController : MonoBehaviour
     public Image glowImage;
 
     [Header("Reward Element")]
-    public GameObject LevelCompleteScreen; 
+    public GameObject LevelCompleteScreen;
 
     [Header("Animation Settings")]
     public float clickScale = 0.8f;
@@ -22,6 +23,7 @@ public class StarButtonController : MonoBehaviour
     private GlowAnimation glowAnimation;
     private Vector3 originalScale;
     private Sequence clickSequence;
+    private bool hasInitialized = false;
 
     void Start()
     {
@@ -31,35 +33,38 @@ public class StarButtonController : MonoBehaviour
         sparkleController = sparkleParticles?.GetComponent<SparkleController>();
         glowAnimation = glowImage?.GetComponent<GlowAnimation>();
 
-        if (LevelCompleteScreen != null)
-            LevelCompleteScreen.SetActive(false);
+        if (LevelCompleteScreen != null && !hasInitialized)
+        {
+            LevelCompleteScreen.SetActive(true);
+            StartCoroutine(InitializeScreen());
+        }
+    }
+
+    private IEnumerator InitializeScreen()
+    {
+        yield return new WaitForEndOfFrame();
+        ResetLevelCompleteScreenState();
+        LevelCompleteScreen.SetActive(false);
+        hasInitialized = true;
     }
 
     void OnStarButtonClick()
     {
-        
         if (clickSequence.isAlive)
             clickSequence.Stop();
 
-        
         glowAnimation?.StopPulse();
 
-        //OnClick Animation
         clickSequence = Sequence.Create()
-            
             .Group(Tween.Scale(starIcon.transform, originalScale, originalScale * clickScale, clickDuration * 0.3f, Ease.OutQuad))
             .Group(Tween.Rotation(starIcon.transform, Vector3.zero, new Vector3(0, 0, -rotationAmount), clickDuration * 0.3f))
-
-            
             .Group(Tween.Scale(starIcon.transform, originalScale * clickScale, originalScale, clickDuration * 0.7f, Ease.OutBack))
             .Group(Tween.Rotation(starIcon.transform, new Vector3(0, 0, -rotationAmount), Vector3.zero, clickDuration * 0.7f))
-
             .OnComplete(OnClickAnimationComplete);
     }
 
     void OnClickAnimationComplete()
     {
-                
         if (glowImage != null)
         {
             Sequence.Create()
@@ -77,30 +82,61 @@ public class StarButtonController : MonoBehaviour
     {
         if (LevelCompleteScreen != null)
         {
-            LevelCompleteScreen.SetActive(true);
+            if (!hasInitialized)
+            {
+                ResetLevelCompleteScreenState();
+                hasInitialized = true;
+            }
 
-            AnimateLevelCompleteApearance();
-            sparkleParticles.Stop();
-            sparkleParticles.Clear();
-            
+            LevelCompleteScreen.SetActive(true);
+            StartCoroutine(AnimateAfterFrame());
+
+            if (sparkleParticles != null)
+            {
+                sparkleParticles.Stop();
+                sparkleParticles.Clear();
+            }
         }
     }
 
-    void AnimateLevelCompleteApearance()
+    private IEnumerator AnimateAfterFrame()
     {
-        
+        yield return null;
+        AnimateLevelCompleteAppearance();
+    }
+
+    void AnimateLevelCompleteAppearance()
+    {
         if (LevelCompleteScreen.TryGetComponent<CanvasGroup>(out var canvasGroup))
         {
-           
+            canvasGroup.alpha = 0f;
+            LevelCompleteScreen.transform.localScale = Vector3.zero;
+
             Sequence.Create()
                 .Group(Tween.Alpha(canvasGroup, 0f, 1f, 0.5f))
                 .Group(Tween.Scale(LevelCompleteScreen.transform, Vector3.zero, Vector3.one, 0.5f, Ease.OutBack));
-
         }
         else
         {
-            
+            LevelCompleteScreen.transform.localScale = Vector3.zero;
             Tween.Scale(LevelCompleteScreen.transform, Vector3.zero, Vector3.one, 0.5f, Ease.OutBack);
+        }
+    }
+
+    void ResetLevelCompleteScreenState()
+    {
+        if (LevelCompleteScreen == null) return;
+
+        if (LevelCompleteScreen.TryGetComponent<CanvasGroup>(out var canvasGroup))
+        {
+            canvasGroup.alpha = 0f;
+        }
+        LevelCompleteScreen.transform.localScale = Vector3.zero;
+
+        var levelCompleteController = LevelCompleteScreen.GetComponent<LevelCompleteController>();
+        if (levelCompleteController != null)
+        {
+            levelCompleteController.ResetPanelState();
         }
     }
 
