@@ -47,8 +47,6 @@ public class LevelCompleteController : MonoBehaviour
 
     private void StartCurrencyAnimation()
     {
-        
-        if (!this.isActiveAndEnabled) return;
 
         Sequence iconSequence = Sequence.Create()
            .Chain(Tween.Scale(currencyIcon.transform, Vector3.zero, Vector3.one * 1.3f, 0.4f, Ease.OutBack))
@@ -61,6 +59,10 @@ public class LevelCompleteController : MonoBehaviour
                if (this.isActiveAndEnabled)
                {
                    currencyCoroutine = StartCoroutine(AnimateCurrencyCounter());
+               }
+               else
+               {
+                   currencyText.text = earnedCurrency.ToString();
                }
            });
     }
@@ -100,8 +102,6 @@ public class LevelCompleteController : MonoBehaviour
 
     private void PlayMainParticles()
     {
-        
-        if (!this.isActiveAndEnabled) return;
 
         foreach (var ps in celebrationParticles)
         {

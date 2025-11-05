@@ -65,28 +65,28 @@ public class StarButtonController : MonoBehaviour
             Sequence.Create()
                 .Chain(Tween.Alpha(glowImage, glowImage.color.a, 1f, 0.1f))
                 .Chain(Tween.Alpha(glowImage, 1f, 0f, 0.4f))
-                .OnComplete(ShowRewardElement);
+                .OnComplete(ShowLevelComplete);
         }
         else
         {
-            ShowRewardElement();
+            ShowLevelComplete();
         }
     }
 
-    void ShowRewardElement()
+    void ShowLevelComplete()
     {
         if (LevelCompleteScreen != null)
         {
             LevelCompleteScreen.SetActive(true);
 
-            AnimateRewardAppearance();
+            AnimateLevelCompleteApearance();
             sparkleParticles.Stop();
             sparkleParticles.Clear();
             
         }
     }
 
-    void AnimateRewardAppearance()
+    void AnimateLevelCompleteApearance()
     {
         
         if (LevelCompleteScreen.TryGetComponent<CanvasGroup>(out var canvasGroup))
@@ -95,6 +95,7 @@ public class StarButtonController : MonoBehaviour
             Sequence.Create()
                 .Group(Tween.Alpha(canvasGroup, 0f, 1f, 0.5f))
                 .Group(Tween.Scale(LevelCompleteScreen.transform, Vector3.zero, Vector3.one, 0.5f, Ease.OutBack));
+
         }
         else
         {
