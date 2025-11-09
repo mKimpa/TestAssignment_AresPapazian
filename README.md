@@ -48,3 +48,15 @@
 - **PrimeTween integration** for smooth animations
 - **Responsive UI** with Canvas Scaler and safe areas
 - **Prefab-based** screen system
+
+# 🔄 Post-Submission Commit
+
+## Added Features:
+
+- Locked button press animations
+
+## Time Investment:
+
+- Animation Development: 1 hour
+- Integration & Testing: 30 minutes
+- Total Additional Time: 1.5 hours
