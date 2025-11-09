@@ -19,7 +19,7 @@ public class BottomBarView : MonoBehaviour
         bottomButtons = ButtonsContainer.GetComponentsInChildren<BottomButton>();
     }
 
-    public void ButtonClick(int index)
+    public void ButtonClick(int index, bool isEnabled)
     {
         if (selectedButtonIndex == index)
         {
@@ -28,12 +28,16 @@ public class BottomBarView : MonoBehaviour
             Closed?.Invoke(this, EventArgs.Empty);
             return;
         }
-        if (selectedButtonIndex >= 0)
+        if (isEnabled)
         {
-            bottomButtons[selectedButtonIndex].SelectButton(false);
+            if (selectedButtonIndex >= 0)
+            {
+                bottomButtons[selectedButtonIndex].SelectButton(false);
+            }
+            selectedButtonIndex = index;
+            ContentActivated?.Invoke(this, EventArgs.Empty);
         }
-        selectedButtonIndex = index;
+
         bottomButtons[index].SelectButton(true);
-        ContentActivated?.Invoke(this, EventArgs.Empty);
     }
 }
